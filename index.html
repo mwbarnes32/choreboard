@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kid Power Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Quicksand', sans-serif; background-color: #f0f9ff; }
+        .title-font { font-family: 'Luckiest Guy', cursive; }
+        /* Custom checkbox size for iPad fingers */
+        input[type="checkbox"] { transform: scale(2.5); cursor: pointer; }
+        .chore-card:active { transform: scale(0.98); }
+    </style>
+</head>
+<body class="p-6 md:p-12 min-h-screen flex flex-col justify-between">
+
+    <div>
+        <header class="text-center mb-12">
+            <h1 class="title-font text-6xl md:text-8xl text-blue-600 drop-shadow-lg tracking-wide mb-4">SUPER DASHBOARD!</h1>
+            <div class="inline-block bg-yellow-400 border-4 border-yellow-500 rounded-full px-10 py-4 shadow-xl">
+                <span class="text-3xl font-bold text-yellow-900 uppercase tracking-tighter">Your Points:</span>
+                <span id="pointTotal" class="title-font text-5xl text-yellow-900 ml-2">0</span>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto mb-12">
+            
+            <section class="bg-white rounded-3xl p-8 shadow-2xl border-t-8 border-green-400">
+                <h2 class="title-font text-4xl text-green-600 mb-8 flex items-center">
+                    ✅ Daily Chores
+                </h2>
+                <div class="space-y-6" id="choreList">
+                    <p class="text-gray-500 text-xl animate-pulse">Loading chores from the cloud...</p>
+                </div>
+                <button id="resetChoresBtn" class="mt-10 w-full py-4 bg-gray-100 text-gray-500 rounded-xl font-bold text-xl hover:bg-gray-200 transition">Reset Chores for Tomorrow</button>
+            </section>
+
+            <section class="bg-white rounded-3xl p-8 shadow-2xl border-t-8 border-purple-400">
+                <h2 class="title-font text-4xl text-purple-600 mb-8 flex items-center">
+                    🎁 Reward Shop
+                </h2>
+                <div class="grid grid-cols-1 gap-6">
+                    <button onclick="buyReward(20, 'Extra Screen Time')" class="flex justify-between items-center p-6 bg-purple-50 border-2 border-purple-100 rounded-2xl hover:bg-purple-100 active:bg-purple-200 transition group">
+                        <span class="text-2xl font-bold text-gray-700">Extra Screen Time (15m)</span>
+                        <span class="bg-purple-500 text-white px-6 py-2 rounded-full font-bold text-xl group-hover:scale-110 transition">20 pts</span>
+                    </button>
+                    <button onclick="buyReward(50, 'Dessert After Dinner')" class="flex justify-between items-center p-6 bg-purple-50 border-2 border-purple-100 rounded-2xl hover:bg-purple-100 active:bg-purple-200 transition group">
+                        <span class="text-2xl font-bold text-gray-700">Dessert After Dinner</span>
+                        <span class="bg-purple-500 text-white px-6 py-2 rounded-full font-bold text-xl group-hover:scale-110 transition">50 pts</span>
+                    </button>
+                    <button onclick="buyReward(100, 'Small Toy or Treat')" class="flex justify-between items-center p-6 bg-purple-50 border-2 border-purple-100 rounded-2xl hover:bg-purple-100 active:bg-purple-200 transition group">
+                        <span class="text-2xl font-bold text-gray-700">Small Toy or Treat</span>
+                        <span class="bg-purple-500 text-white px-6 py-2 rounded-full font-bold text-xl group-hover:scale-110 transition">100 pts</span>
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="max-w-7xl mx-auto w-full border-t border-gray-200 pt-6">
+        <div class="text-center">
+            <button id="toggleParentBtn" class="px-6 py-2 bg-gray-600 text-white font-bold rounded-full text-sm tracking-wider uppercase shadow hover:bg-gray-700 transition">⚙️ Toggle Parent Mode</button>
+        </div>
+
+        <div id="parentPanel" class="hidden mt-6 p-6 bg-slate-100 rounded-3xl border border-slate-300 shadow-inner grid grid-cols-1
