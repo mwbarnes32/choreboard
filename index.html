@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kid Power Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Quicksand', sans-serif; background-color: #f0f9ff; }
+        .title-font { font-family: 'Luckiest Guy', cursive; }
+        input[type="checkbox"] { transform: scale(2.5); cursor: pointer; }
+        .chore-card:active { transform: scale(0.98); }
+    </style>
+</head>
+<body class="p-6 md:p-12 min-h-screen flex flex-col justify-between">
+
+    <div>
+        <header class="text-center mb-8">
+            <h1 class="title-font text-5xl md:text-7xl text-blue-600 drop-shadow-lg tracking-wide mb-6">SUPER DASHBOARD!</h1>
+            
+            <div class="flex justify-center space-x-4 mb-6">
+                <button id="tab-AvaLava" onclick="switchKid('AvaLava')" class="title-font text-3xl px-8 py-4 rounded-2xl bg-pink-500 text-white shadow-lg border-b-4 border-pink-700 transform scale-110 transition-all">
+                    🌋 AvaLava
+                </button>
+                <button id="tab-MillieMooMoo" onclick="switchKid('MillieMooMoo')" class="title-font text-3xl px-8 py-4 rounded-2xl bg-gray-300 text-gray-700 shadow-lg border-b-4 border-gray-400 transition-all">
+                    🐮 MillieMooMoo
+                </button>
+            </div>
+
+            <div class="inline-block bg-yellow-400 border-4 border-yellow-500 rounded-full px-10 py-3 shadow-xl">
+                <span id="kidScoreLabel" class="text-2xl font-bold text-yellow-900 uppercase tracking-tighter">AvaLava's Points:</span>
+                <span id="pointTotal" class="title-font text-5xl text-yellow-900 ml-2">0</span>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto mb-12">
+            
+            <section class="bg-white rounded-3xl p-8 shadow-2xl border-t-8 border-green-400">
+                <h2 class="title-font text-4xl text-green-600 mb-8 flex items-center">
+                    ✅ Daily Chores
+                </h2>
+                <div class="space-y-6" id="choreList">
+                    <p class="text-gray-500 text-xl animate-pulse">Loading chores from the cloud...</p>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-3xl p-8 shadow-2xl border-t-8 border-purple-400">
+                <h2 class="title-font text-4xl text-purple-600 mb-8 flex items-center">
+                    🎁 Reward Shop
+                </h2>
+                <div class="grid grid-cols-1 gap-6">
+                    <button onclick="buyReward(20, 'Extra Screen Time')" class="flex justify-between items-center p-6 bg-purple-50 border-2 border-purple-100 rounded-2xl hover:bg-purple-100 active:bg-purple-200 transition group">
+                        <span class="text-2xl font-bold text-gray-700">Extra Screen Time (15m)</span>
+                        <span class="bg-purple-500 text-white px-6 py-2 rounded-full font-bold text-xl group-hover:scale-110 transition">20 pts</span>
+                    </button>
+                    <button onclick="buyReward(50, 'Dessert After Dinner')" class="flex justify-between items-center p-6 bg-purple-50 border-2 border-purple-100 rounded-2xl hover:bg-purple-100 active:bg-purple-200 transition group">
+                        <span class="text-2xl font-bold text-gray-700">Dessert After Dinner</span>
+                        <span class="bg-purple-500 text-white px-6 py-2 rounded-full font-bold text-xl group-hover:scale-110 transition">50 pts</span>
+                    </button>
+                    <button onclick="buyReward(100, 'Small Toy or Treat')" class="flex justify-between items-center p-6 bg-purple-50 border-2 border-purple-100 rounded-2xl hover:bg-purple-100 active:bg-purple-200 transition group">
+                        <span class="text-2xl font-bold text-gray-700">Small Toy or Treat</span>
+                        <span class="bg-purple-500 text-white px-6 py-2 rounded-full font-bold text-xl group-hover:scale-110 transition">100 pts</span>
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        window.currentKid = "AvaLava";
+        window.scores = { AvaLava: 0, MillieMooMoo: 0 };
+
+        function switchKid(kidName) {
+            window.currentKid = kidName;
+            const avaBtn = document.getElementById('tab-AvaLava');
+            const millieBtn = document.getElementById('tab-MillieMooMoo');
+            
+            if(kidName === "AvaLava") {
+                avaBtn.className = "title-font text-3xl px-8 py-4 rounded-2xl bg-pink-500 text-white shadow-lg border-b-4 border-pink-700 transform scale-110 transition-all";
+                millieBtn.className = "title-font text-3xl px-8 py-4 rounded-2xl bg-gray-300 text-gray-700 shadow-lg border-b-4 border-gray-400 transition-all";
+            } else {
+                millieBtn.className = "title-font text-3xl px-8 py-4 rounded-2xl bg-purple-600 text-white shadow-lg border-b-4 border-purple-800 transform scale-110 transition-all";
+                avaBtn.className = "title-font text-3xl px-8 py-4 rounded-2xl bg-gray-300 text-gray-700 shadow-lg border-b-4 border-gray-400 transition-all";
+            }
+
+            document.getElementById('kidScoreLabel').innerText = `${kidName}'s Points:`;
+            document.getElementById('pointTotal').innerText = window.scores[kidName] || 0;
+
+            if (window.refreshAppView) {
+                window.refreshAppView();
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbDDP4GA5ES82VnTdcWHfMQcADIOtxldA",
+            authDomain: "family-hub-6fda6.firebaseapp.com",
+            projectId: "family-hub-6fda6",
+            storageBucket: "family-hub-6fda6.firebasestorage.app",
+            messagingSenderId: "697838511489",
+            appId: "1:697838511489:web:dcbd462334af983635f480",
+            measurementId: "G-P3BFCJ6SP4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let cachedChores = [];
+
+        window.refreshAppView = function() {
+            document.getElementById('pointTotal').innerText = window.scores[window.currentKid] || 0;
+            const choreListDiv = document.getElementById('choreList');
+            choreListDiv.innerHTML = "";
+            let counter = 0;
+
+            cachedChores.forEach((item) => {
+                if (item.assignedTo === "Both" || item.assignedTo === window.currentKid) {
+                    counter++;
+                    const isCompleted = item.completedKid && item.completedKid[window.currentKid] === true;
+                    const choreWrapper = document.createElement('div');
+                    choreWrapper.className = "flex items-center p-6 bg-green-50 rounded-2xl border-2 border-green-100 chore-card transition-all relative";
+                    
+                    choreWrapper.innerHTML = `
+                        <input type="checkbox" class="mr-8 accent-green-500" ${isCompleted ? 'checked' : ''} id="cb-${item.id}">
+                        <span class="text-3xl font-bold text-gray-700 ${isCompleted ? 'line-through text-gray-400' : ''}">${item.name}</span>
+                        <span class="ml-auto text-green-600 font-bold text-2xl mr-12">+${item.points}</span>
+                    `;
+
+                    choreWrapper.querySelector(`#cb-${item.id}`).addEventListener('change', async (e) => {
+                        const isChecked = e.target.checked;
+                        let currentStatus = item.completedKid || {};
+                        currentStatus[window.currentKid] = isChecked;
+                        
+                        let pointsValue = parseInt(item.points);
+                        let adjust = isChecked ? pointsValue : -pointsValue;
+                        window.scores[window.currentKid] = (window.scores[window.currentKid] || 0) + adjust;
+
+                        // Save update to Chore collection
+                        await updateDoc(doc(db, "chores", item.id), { completedKid: currentStatus });
+                        // Save up-to-date points balances 
+                        await setDoc(doc(db, "pointsConfig", "familyBalances"), window.scores);
+
+                        // WEEKLY LOG SYSTEM TRACKER
+                        if(isChecked) {
+                            await addDoc(collection(db, "choreHistoryLogs"), {
+                                kid: window.currentKid,
+                                choreName: item.name,
+                                points: pointsValue,
+                                timestamp: Date.now() // Captures raw timestamp to organize Mon-Sun segments
+                            });
+                        }
+                    });
+
+                    choreListDiv.appendChild(choreWrapper);
+                }
+            });
+
+            if (counter === 0) {
+                choreListDiv.innerHTML = `<p class="text-gray-400 text-lg py-4 text-center">No chores assigned yet!</p>`;
+            }
+        };
+
+        // Sync Point Balances
+        onSnapshot(doc(db, "pointsConfig", "familyBalances"), (docSnap) => {
+            if (docSnap.exists()) {
+                window.scores = docSnap.data();
+            }
+            window.refreshAppView();
+        });
+
+        // Sync Master Chore Checklists
+        onSnapshot(collection(db, "chores"), (querySnapshot) => {
+            cachedChores = [];
+            querySnapshot.forEach((doc) => {
+                cachedChores.push({ id: doc.id, ...doc.data() });
+            });
+            window.refreshAppView();
+        });
+    </script>
+
+    <script>
+        function buyReward(cost, name) {
+            let currentPoints = window.scores[window.currentKid] || 0;
+            if (currentPoints >= cost) {
+                if (confirm(`Spend ${cost} points on "${name}"?`)) {
+                    window.scores[window.currentKid] = currentPoints - cost;
+                    alert("Reward claimed!");
+                    location.reload(); // Quick refresh to update the central database module safely
+                }
+            } else {
+                alert("You need " + (cost - currentPoints) + " more points!");
+            }
+        }
+    </script>
+</body>
+</html>
