@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght=500;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Quicksand', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="p-6 md:p-12 min-h-screen">
+
+    <header class="max-w-6xl mx-auto mb-12 flex justify-between items-center border-b pb-6">
+        <div>
+            <h1 class="text-4xl font-bold text-slate-800">⚙️ Parent Command Center</h1>
+            <p class="text-slate-500 mt-1">Manage chores, rewards, and track historical weekly performance.</p>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex space-x-6">
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase">🌋 AvaLava Total</p>
+                <p id="score-AvaLava" class="text-2xl font-bold text-pink-600">0 pts</p>
+            </div>
+            <div class="border-l pl-6">
+                <p class="text-xs font-bold text-slate-400 uppercase">🐮 MillieMooMoo Total</p>
+                <p id="score-MillieMooMoo" class="text-2xl font-bold text-purple-600">0 pts</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        
+        <!-- Left Column: Weekly Statistics & Overrides -->
+        <div class="space-y-6 lg:col-span-1">
+            <!-- Current Week Progress Box -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
+                <h2 class="text-xl font-bold text-slate-700">📊 This Week (Mon-Sun)</h2>
+                <div class="space-y-3 pt-2">
+                    <div class="flex justify-between text-sm font-bold text-slate-600">
+                        <span>🌋 AvaLava:</span>
+                        <span id="weekly-AvaLava" class="text-pink-600">0 pts</span>
+                    </div>
+                    <div class="border-t pt-3 flex justify-between text-sm font-bold text-slate-600">
+                        <span>🐮 MillieMooMoo:</span>
+                        <span id="weekly-MillieMooMoo" class="text-purple-600">0 pts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historical Performance Timeline -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
+                <h2 class="text-xl font-bold text-slate-700">📜 Historical Performance</h2>
+                <p class="text-xs text-slate-400">Past performance logs grouped by calendar week.</p>
+                <div id="historyLogTimeline" class="space-y-3 max-h-60 overflow-y-auto text-sm text-slate-600 pt-2 divide-y">
+                    <p class="text-gray-400 text-xs py-2">Gathering historical records...</p>
+                </div>
+            </div>
+
+            <!-- Score Override Adjuster -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
+                <h2 class="text-xl font-bold text-slate-700">👑 Manual Points Override</h2>
+                <div>
+                    <select id="scoreTarget" class="w-full p-2 rounded-lg border bg-white text-sm">
+                        <option value="AvaLava">AvaLava</option>
+                        <option value="MillieMooMoo">MillieMooMoo</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="number" id="manualScoreInput" placeholder="Set exact lifetime points" class="w-full p-2 rounded-lg border text-sm">
+                </div>
+                <button id="saveScoreBtn" class="w-full py-2 bg-yellow-500 text-yellow-950 font-bold rounded-lg text-sm hover:bg-yellow-600 transition">Update Points</button>
+            </div>
+        </div>
+
+        <!-- Right Columns: Chore Manager Dashboard Grid -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border lg:col-span-2 space-y-6">
+            <div class="border-b pb-4">
+                <h2 class="text-xl font-bold text-slate-700">📋 Chore Master List</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border">
+                <input type="text" id="choreName" placeholder="Chore Name" class="p-2 rounded-lg border text-sm md:col-span-1">
+                <input type="number" id="chorePoints" placeholder="Points" class="p-2 rounded-lg border text-sm">
+                <select id="choreTarget" class="p-2 rounded-lg border bg-white text-sm">
+                    <option value="Both">Both Kids</option>
+                    <option value="AvaLava">AvaLava Only</option>
+                    <option value="MillieMooMoo">MillieMooMoo Only</option>
+                </select>
+                <button id="addChoreBtn" class="w-full md:col-span-3 py-2 bg-green-600 text-white font-bold rounded-lg text-sm hover:bg-green-700 transition">＋ Add New Chore</button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b text-sm font-bold text-slate-400">
+                            <th class="pb-2">Chore</th>
+                            <th class="pb-2">Points</th>
+                            <th class="pb-2">Assigned To</th>
+                            <th class="pb-2 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="parentChoreList" class="text-sm text-slate-600 divide-y"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbDDP4GA5ES82VnTdcWHfMQcADIOtxldA",
+            authDomain: "family-hub-6fda6.firebaseapp.com",
+            projectId: "family-hub-6fda6",
+            storageBucket: "family-hub-6fda6.firebasestorage.app",
+            messagingSenderId: "697838511489",
+            appId: "1:697838511489:web:dcbd462334af983635f480",
+            measurementId: "G-P3BFCJ6SP4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let currentBalances = { AvaLava: 0, MillieMooMoo: 0 };
+
+        // Helper Calendar Matcher: Figures out the Monday timestamp anchor for any historical item date
+        function getMondayTimestampOfDate(dateObj) {
+            const tempDate = new Date(dateObj);
+            const day = tempDate.getDay();
+            const distance = day === 0 ? 6 : day - 1;
+            tempDate.setDate(tempDate.getDate() - distance);
+            tempDate.setHours(0, 0, 0, 0);
+            return tempDate.getTime();
+        }
+
+        function formatWeekRange(mondayTimestamp) {
+            const start = new Date(mondayTimestamp);
+            const end = new Date(mondayTimestamp + 6 * 24 * 60 * 60 * 1000);
+            return `${start.getMonth()+1}/${start.getDate()} – ${end.getMonth()+1}/${end.getDate()}`;
+        }
+
+        // Sync Balance Displays
+        onSnapshot(doc(db, "pointsConfig", "familyBalances"), (docSnap) => {
+            if (docSnap.exists()) {
+                currentBalances = docSnap.data();
+                document.getElementById('score-AvaLava').innerText = `${currentBalances.AvaLava || 0} pts`;
+                document.getElementById('score-MillieMooMoo').innerText = `${currentBalances.MillieMooMoo || 0} pts`;
+            }
+        });
+
+        // Sync History and Render Multi-Week Performance Timeline
+        onSnapshot(collection(db, "choreHistoryLogs"), (querySnapshot) => {
+            const currentMonday = getMondayTimestampOfDate(new Date());
+            let currentWeeklyScores = { AvaLava: 0, MillieMooMoo: 0 };
+            
+            // This object will sort records automatically by week key
+            let historicalWeeks = {};
+
+            querySnapshot.forEach((logDoc) => {
+                const logData = logDoc.data();
+                const logTime = logData.timestamp || Date.now();
+                const weekKey = getMondayTimestampOfDate(new Date(logTime));
+
+                if (weekKey === currentMonday) {
+                    currentWeeklyScores[logData.kid] += parseInt(logData.points);
+                } else {
+                    // Grouping historical items by past week keys
+                    if (!historicalWeeks[weekKey]) {
+                        historicalWeeks[weekKey] = { AvaLava: 0, MillieMooMoo: 0 };
+                    }
+                    historicalWeeks[weekKey][logData.kid] += parseInt(logData.points);
+                }
+            });
+
+            // Update current week layout containers
+            document.getElementById('weekly-AvaLava').innerText = `${currentWeeklyScores.AvaLava} pts`;
+            document.getElementById('weekly-MillieMooMoo').innerText = `${currentWeeklyScores.MillieMooMoo} pts`;
+
+            // Process Timeline UI Display list container box
+            const historyContainer = document.getElementById('historyLogTimeline');
+            historyContainer.innerHTML = "";
+
+            // Sort past weeks so newest ones show at the top of the history box
+            const sortedWeekKeys = Object.keys(historicalWeeks).sort((a, b) => b - a);
+
+            if (sortedWeekKeys.length === 0) {
+                historyContainer.innerHTML = `<p class="text-gray-400 text-xs py-2">No historical weeks archived yet. History compiles as weeks cycle.</p>`;
+                return;
+            }
+
+            sortedWeekKeys.forEach((key) => {
+                const weekTimestamp = parseInt(key);
+                const scores = historicalWeeks[weekTimestamp];
+                const weekRow = document.createElement('div');
+                weekRow.className = "py-3 flex flex-col space-y-1 first:pt-0";
+                weekRow.innerHTML = `
+                    <p class="font-bold text-slate-700 text-xs uppercase tracking-wider text-slate-400">📅 Week: ${formatWeekRange(weekTimestamp)}</p>
+                    <div class="flex justify-between text-xs font-semibold">
+                        <span>🌋 AvaLava: <b class="text-pink-600">${scores.AvaLava} pts</b></span>
+                        <span>🐮 MillieMooMoo: <b class="text-purple-600">${scores.MillieMooMoo} pts</b></span>
+                    </div>
+                `;
+                historyContainer.appendChild(weekRow);
+            });
+        });
+
+        // Realtime Chore Master Table Sync
+        onSnapshot(collection(db, "chores"), (querySnapshot) => {
+            const tbody = document.getElementById('parentChoreList');
+            tbody.innerHTML = "";
+            querySnapshot.forEach((choreDoc) => {
+                const chore = choreDoc.data();
+                const id = choreDoc.id;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 font-bold text-slate-700">${chore.name}</td>
+                    <td class="py-3 text-green-600 font-bold">+${chore.points}</td>
+                    <td class="py-3"><span class="px-2 py-1 text-xs font-bold rounded-md bg-slate-100">${chore.assignedTo}</span></td>
+                    <td class="py-3 text-right"><button class="text-red-400 hover:text-red-600 font-bold px-2 py-1 rounded" data-id="${id}">Remove</button></td>
+                `;
+                tr.querySelector('button').addEventListener('click', async () => {
+                    if(confirm(`Delete "${chore.name}" permanently?`)) {
+                        await deleteDoc(doc(db, "chores", id));
+                    }
+                });
+                tbody.appendChild(tr);
+            });
+        });
+
+        // Add Chore Input Engine 
+        document.getElementById('addChoreBtn').addEventListener('click', async () => {
+            const nameInput = document.getElementById('choreName');
+            const pointsInput = document.getElementById('chorePoints');
+            const targetSelect = document.getElementById('choreTarget');
+
+            if(!nameInput.value.trim() || isNaN(parseInt(pointsInput.value))) {
+                alert("Please fill out chore name and point values.");
+                return;
+            }
+
+            await addDoc(collection(db, "chores"), {
+                name: nameInput.value.trim(),
+                points: parseInt(pointsInput.value),
+                assignedTo: targetSelect.value,
+                completedKid: { AvaLava: false, MillieMooMoo: false }
+            });
+            nameInput.value = ''; pointsInput.value = '';
+        });
+
+        // Manual point adjust handler button override 
+        document.getElementById('saveScoreBtn').addEventListener('click', async () => {
+            const target = document.getElementById('scoreTarget').value;
+            const value = parseInt(document.getElementById('manualScoreInput').value);
+            if(!isNaN(value)) {
+                currentBalances[target] = value;
+                await setDoc(doc(db, "pointsConfig", "familyBalances"), currentBalances);
+                document.getElementById('manualScoreInput').value = '';
+                alert(`Updated points balance!`);
+            }
+        });
+    </script>
+</body>
+</html>
